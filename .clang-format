@@ -1,0 +1,98 @@
+################################################################################
+Language:                                   Cpp
+BasedOnStyle:                               Google
+Standard:                                   Cpp11
+################################################################################
+
+# Ancho y sangrías
+IndentWidth:                                 4
+TabWidth:                                    4
+UseTab:                                      Never
+ColumnLimit:                                 120
+
+# Llaves al estilo VS/LLVM (en la misma línea: "Attach")
+BreakBeforeBraces:                           Allman
+BraceWrapping:
+  AfterClass:                                false
+  AfterControlStatement:                     false
+  AfterEnum:                                 false
+  AfterFunction:                             false
+  AfterNamespace:                            false
+  AfterObjCDeclaration:                      false
+  AfterStruct:                               false
+  AfterUnion:                                false
+  AfterExternBlock:                          false
+  BeforeCatch:                               false
+  BeforeElse:                                false
+  IndentBraces:                              false
+  SplitEmptyFunction:                        true
+  SplitEmptyRecord:                          true
+  SplitEmptyNamespace:                       true
+
+# Inicializadores de constructores: compactos en una línea si entran
+BreakConstructorInitializers:                BeforeColon
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth:           0
+
+# Alineaciones / espaciado
+AlignAfterOpenBracket:                       DontAlign
+AlignTrailingComments:                       true
+DerivePointerAlignment:                      false
+PointerAlignment:                            Left
+QualifierAlignment:                          Right
+SpacesInParentheses:                         false
+SpacesInSquareBrackets:                      false
+SpacesInAngles:                              false
+SpaceBeforeParens:                           ControlStatements
+SpaceBeforeCpp11BracedList:                  false
+SpaceBeforeInheritanceColon:                 true
+SpaceBeforeRangeBasedForLoopColon:           true
+SpaceAfterTemplateKeyword:                   true
+SpaceAfterCStyleCast:                        false
+SpacesInCStyleCastParentheses:               false
+SpacesInContainerLiterals:                   false
+SpacesBeforeTrailingComments:                1
+SpaceBeforeAssignmentOperators:              true
+
+# Saltos de línea y empaquetado de argumentos
+AllowShortBlocksOnASingleLine:               false
+AllowShortFunctionsOnASingleLine:            Empty
+AllowShortIfStatementsOnASingleLine:         false
+AllowShortLambdasOnASingleLine:              All
+AllowShortLoopsOnASingleLine:                false
+BinPackArguments:                            true
+BinPackParameters:                           false
+
+# Operadores y ternarios (similar a LLVM/VS)
+BreakBeforeBinaryOperators:                  NonAssignment
+BreakBeforeTernaryOperators:                 true
+
+# Templates
+AlwaysBreakTemplateDeclarations:             true
+
+# Comentarios y reflow
+ReflowComments:                              false
+KeepEmptyLinesAtTheStartOfBlocks:            false
+MaxEmptyLinesToKeep:                         2
+
+# Namespaces y includes (VS suele no reordenar; preservamos bloques)
+CompactNamespaces:                           false
+NamespaceIndentation:                        All
+IncludeBlocks:                               Preserve
+IncludeCategories:
+  - Regex:           '"([A-Za-z0-9.\\Q/-_\\E])+"'
+    Priority:        1
+  - Regex:           '^<(gtest|gmock)'
+    Priority:        30
+  - Regex:           '\\.h>'
+    Priority:        99
+  - Regex:           '.*'
+    Priority:        100
+SortUsingDeclarations:                       true
+FixNamespaceComments:                        true
+
+# Varios
+Cpp11BracedListStyle:                        true
+ExperimentalAutoDetectBinPacking:            false
+AccessModifierOffset:                        -4
+IndentCaseLabels:                            false
