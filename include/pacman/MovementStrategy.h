@@ -1,8 +1,9 @@
 #pragma once
 
-#include "pacman/Ghost.h"
 #include "pacman/Board.h"
-#include "../../src/main.cpp"
+#include "pacman/Player.h"
+
+class Ghost;
 
 struct MovementStrategy
 {

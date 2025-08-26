@@ -3,8 +3,7 @@
 #include "pacman/Board.h"
 #include "pacman/Color.h"
 #include "pacman/Coordinate.h"
-#include "pacman/MovementStategy.h"
-#include "../../src/main.cpp"
+#include "pacman/MovementStrategy.h"
 
 enum class GhostState
 {
@@ -14,10 +13,12 @@ enum class GhostState
     Eaten
 };
 
+struct Player;
+
 class Ghost
 {
 public:
-    Ghost(Color color, Coordinate coord) : mColor{color}, mPos{coord} {};
+    Ghost(Color color, Coordinate coord) : mColor{color}, mPos{coord} {}
     ~Ghost() = default;
 
     void move(Board const& board, Player const& player);
@@ -26,27 +27,22 @@ public:
     {
         mState = newState;
     }
-
     [[nodiscard]] GhostState getState() const
     {
         return mState;
     }
-
     [[nodiscard]] Color getColor() const
     {
         return mColor;
     }
-
     [[nodiscard]] Coordinate getPos() const
     {
         return mPos;
     }
-
     void setPos(Coordinate coord)
     {
         mPos = coord;
     }
-
     [[nodiscard]] Coordinate getLastPos() const
     {
         return mLastPos;

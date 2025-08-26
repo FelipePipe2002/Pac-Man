@@ -1,3 +1,5 @@
+#pragma once
+
 #include "pacman/Ghost.h"
 #include "pacman/Board.h"
 

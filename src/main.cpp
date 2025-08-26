@@ -2,6 +2,8 @@
 #include "pacman/Coordinate.h"
 #include "pacman/MapJson.h"
 #include "pacman/Color.h"
+#include "pacman/Direction.h"
+#include "pacman/Player.h"
 
 #include <chrono>
 #include <fstream>
@@ -16,84 +18,43 @@
 //          Player
 //===========================
 
-struct Player
+void tryChangeDirection(Player& player, Direction dirBuffer, Board const& board)
 {
-    Coordinate pos;
-    std::string symbol = "🌜";
-};
-
-void tryChangeDirection(char& actual, char candidate, Coordinate const& pos, Board const& board)
-{
-    Coordinate newPos = pos;
-    switch (candidate)
+    Coordinate newPos = player.pos;
+    switch (dirBuffer)
     {
-    case 'W':
-    {
+    case Direction::Up:
         newPos.y--;
         if (board.isEnabled(newPos))
         {
-            actual = 'W';
+            player.dir = Direction::Up;
         }
         break;
-    }
-    case 'S':
-    {
+    case Direction::Down:
         newPos.y++;
         if (board.isEnabled(newPos))
         {
-            actual = 'S';
+            player.dir = Direction::Down;
         }
         break;
-    }
-    case 'A':
-    {
+    case Direction::Left:
         newPos.x--;
         if (board.isEnabled(newPos))
         {
-            actual = 'A';
+            player.dir = Direction::Left;
         }
         break;
-    }
-    case 'D':
-    {
+    case Direction::Right:
         newPos.x++;
         if (board.isEnabled(newPos))
         {
-            actual = 'D';
+            player.dir = Direction::Right;
         }
         break;
-    }
     default:
+        player.dir = Direction::None;
         break;
     }
-}
-
-Coordinate nextPosition(Coordinate pos, char dir)
-{
-    switch (dir)
-    {
-    case 'W':
-    {
-        pos.y--;
-        break;
-    }
-    case 'S':
-    {
-        pos.y++;
-        break;
-    }
-    case 'A':
-    {
-        pos.x--;
-        break;
-    }
-    case 'D':
-    {
-        pos.x++;
-        break;
-    }
-    }
-    return pos;
 }
 
 //===========================
@@ -118,7 +79,7 @@ static void drawGrid(Player player, Board const& board)
             Coordinate actualPos(x, y);
             std::string symbol;
             if (player.pos == actualPos)
-                symbol = applyColor(Color::Yellow, player.symbol);
+                symbol = applyColor(Color::Yellow, player.getSymbol());
             else if (!board.isEnabled(actualPos))
                 symbol = applyColor(Color::Blue, "██");
             else if (board.hasPoint(actualPos))
@@ -180,7 +141,7 @@ int main()
     player.pos = board.PlayerStratingPoint();
 
     char actual = ' ';
-    char lastPressed = ' ';
+    Direction dirBuffer = Direction::None;
     std::optional<Coordinate> optNewPos = std::nullopt;
     bool justTeleported = false;
     while (true)
@@ -201,32 +162,24 @@ int main()
         // DIRECTION
         if (GetAsyncKeyState('W') & 0x8000)
         {
-            lastPressed = 'W';
+            dirBuffer = Direction::Up;
         }
         else if (GetAsyncKeyState('S') & 0x8000)
         {
-            lastPressed = 'S';
+            dirBuffer = Direction::Down;
         }
         else if (GetAsyncKeyState('A') & 0x8000)
         {
-            lastPressed = 'A';
+            dirBuffer = Direction::Left;
         }
         else if (GetAsyncKeyState('D') & 0x8000)
         {
-            lastPressed = 'D';
+            dirBuffer = Direction::Right;
         }
 
         // BUFFER NEW MOVEMENT
-        tryChangeDirection(actual, lastPressed, player.pos, board);
+        tryChangeDirection(player, dirBuffer, board);
 
-        if (actual == 'D')
-        {
-            player.symbol = "🌜";
-        }
-        else if (actual == 'A')
-        {
-            player.symbol = "🌛";
-        }
 
         // MOVEMENT
         if (justTeleported)
@@ -235,7 +188,7 @@ int main()
         }
         else
         {
-            Coordinate newPos = nextPosition(player.pos, actual);
+            Coordinate newPos = player.move();
 
             if (board.isEnabled(newPos))
             {
