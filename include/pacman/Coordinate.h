@@ -22,6 +22,13 @@ inline bool operator<(Coordinate const& lhs, Coordinate const& rhs)
     return (lhs.x < rhs.x) || (lhs.x == rhs.x && lhs.y < rhs.y);
 }
 
+inline size_t hashCoord(Coordinate const &coord) noexcept
+{
+    size_t xHash = std::hash<int>()(coord.x);
+    size_t yHash = std::hash<int>()(coord.y);
+    return xHash ^ (yHash << 1);
+}
+
 namespace std
 {
     template <>
@@ -29,9 +36,7 @@ namespace std
     {
         size_t operator()(Coordinate const& coord) const noexcept
         {
-            size_t xHash = std::hash<int>()(coord.x);
-            size_t yHash = std::hash<int>()(coord.y);
-            return xHash ^ (yHash << 1);
+            return hashCoord(coord);
         }
     };
 }

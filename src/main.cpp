@@ -2,6 +2,8 @@
 #include "pacman/Color.h"
 #include "pacman/Coordinate.h"
 #include "pacman/Direction.h"
+#include "pacman/Ghost.h"
+#include "pacman/MovementStrategy.h"
 #include "pacman/Player.h"
 #include "pacman/json/MapJson.h"
 
@@ -59,7 +61,7 @@ static void moveCursorHome()
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 0});
 }
 
-static void drawGrid(Player const& player, Board const& board)
+static void drawGrid(Player& player, Ghost& ghost, Board const& board)
 {
     std::ostringstream frame;
     frame << "ESC: quit | WASD: move\n\n";
@@ -73,17 +75,25 @@ static void drawGrid(Player const& player, Board const& board)
         {
             Coordinate actualPos(x, y);
             std::string symbol;
-            if (player.pos == actualPos)
+            if (player.getPosition() == actualPos)
+            {
                 symbol = applyColor(Color::Yellow, player.getSymbol());
+            }
             else if (!board.isEnabled(actualPos))
+            {
                 symbol = applyColor(Color::Blue, "██");
+            }
             else if (board.hasPoint(actualPos))
+            {
                 symbol = applyColor(Color::White, ". ");
+            }
             else
+            {
                 symbol = "  ";
+            }
 
-            if (actualPos == Coordinate(1, 1))
-                symbol = applyColor(Color::Red, "👻");
+            if (actualPos == ghost.getPosition())
+                symbol = applyColor(ghost.getColor(), "👻");
 
             frame << symbol;
         }
@@ -96,28 +106,28 @@ static void drawGrid(Player const& player, Board const& board)
 
 void tryChangeDirection(Player& player, Direction dirBuffer, Board const& board)
 {
-    Coordinate newPos = player.pos;
+    Coordinate newPos = player.getPosition();
     switch (dirBuffer)
     {
-        case Direction::Up:
-            newPos.y--;
-            break;
-        case Direction::Down:
-            newPos.y++;
-            break;
-        case Direction::Left:
-            newPos.x--;
-            break;
-        case Direction::Right:
-            newPos.x++;
-            break;
-        default:
-            return;
+    case Direction::Up:
+        newPos.y--;
+        break;
+    case Direction::Down:
+        newPos.y++;
+        break;
+    case Direction::Left:
+        newPos.x--;
+        break;
+    case Direction::Right:
+        newPos.x++;
+        break;
+    default:
+        return;
     }
 
     if (board.isEnabled(newPos))
     {
-        player.dir = dirBuffer;
+        player.setDirection(dirBuffer);
     }
 }
 
@@ -126,6 +136,7 @@ void tryChangeDirection(Player& player, Direction dirBuffer, Board const& board)
 //===========================
 int main()
 {
+    //CREDIT TO: Franco for the emojis
     //Init Console
     SetConsoleOutputCP(CP_UTF8);
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -137,15 +148,14 @@ int main()
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &ci);
 
     using clock = std::chrono::steady_clock;
-    constexpr auto kFrame = std::chrono::milliseconds(100);
-    
+    constexpr auto kFrame = std::chrono::milliseconds(300);
+
 
     // GAME
     Board board = loadMap("../assets/map1.json");
     Player player(board.getPlayerStartingPoint(), Direction::None);
+    Ghost ghost(Color::Red, Coordinate(26, 20), Coordinate(1, 2), std::make_unique<ChaseBlinky>(), &player);
     Direction dirBuffer = Direction::None;
-    std::optional<Coordinate> optNewPos = std::nullopt;
-    bool justTeleported = false;
 
     while (true)
     {
@@ -164,49 +174,27 @@ int main()
         }
         tryChangeDirection(player, dirBuffer, board);
 
-
-        // MOVEMENT
-        if (justTeleported) // Just to show where the player is after tp
-        {
-            justTeleported = false;
-        }
-        else
-        {
-            player.move(board);
-        }
+        // PLAYER MOVEMENT
+        player.update(board);
 
         // CHECK FOR POINT
-        if (board.hasPoint(player.pos))
+        if (board.hasPoint(player.getPosition()))
         {
-            board.setPoint(player.pos, false);
+            board.setPoint(player.getPosition(), false);
         }
+
+        // GHOSTS MOVEMENT
+        ghost.update(board);
+
+        // RENDER
+        moveCursorHome();
+        drawGrid(player, ghost, board);
 
         // CHECK FOR WIN
         if (board.allPointsCollected())
         {
             std::cout << "¡Ganaste!\n";
             break;
-        }
-
-        // RENDER
-        moveCursorHome();
-        drawGrid(player, board);
-
-
-        // TELEPORT
-        if (!optNewPos.has_value())
-        {
-            auto optPortal = board.teleportFrom(player.pos);
-            if (optPortal.has_value())
-            {
-                player.pos = optPortal.value();
-                justTeleported = true;
-            }
-            optNewPos = optPortal;
-        }
-        else
-        {
-            optNewPos = std::nullopt;
         }
 
         // FRAME LIMITER

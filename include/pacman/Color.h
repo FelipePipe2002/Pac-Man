@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 
+//CREDIT TO: Hilen for providing this thing
 enum class Color
 {
     Red,

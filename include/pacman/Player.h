@@ -1,19 +1,29 @@
-﻿#pragma once
+#pragma once
 
 #include "pacman/Board.h"
 #include "pacman/Coordinate.h"
 #include "pacman/Direction.h"
-
+#include "pacman/Entity.h"
 #include <string>
 
-struct Player
+class Player : public Entity
 {
-    Coordinate pos{0, 0};
-    Direction dir{Direction::None};
-
-    Player(Coordinate const& startPos, Direction startDir) : pos(startPos), dir(startDir) {}
+public:
+    Player(Coordinate const& startPos, Direction startDir) : Entity(startPos), dir(startDir) {}
 
     [[nodiscard]] std::string getSymbol() const;
 
-    void move(Board const& board);
+    void move(Board const& board) override;
+
+    Direction getDirection() const
+    {
+        return dir;
+    }
+    void setDirection(Direction newDir)
+    {
+        dir = newDir;
+    }
+
+private:
+    Direction dir{Direction::None};
 };

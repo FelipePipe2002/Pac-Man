@@ -13,7 +13,7 @@
 		"######.##### ## #####.######",
 		"     #.##          ##.#     ",
 		"######.## ###  ### ##.######",
-		"      .   #      #   .      ",
+		"      .   #  H   #   .      ",
 		"######.## ######## ##.######",
 		"     #.##    P     ##.#     ",
 		"######.## ######## ##.######",
@@ -50,7 +50,7 @@
     "_comment": "
         Map structure explanation:
 
-        - The layout only contains walls (#), collectible points (.), empty spaces ( ), and the player's starting position (P).  
+        - The layout only contains walls (#), collectible points (.), empty spaces ( ), the player's starting position (P), and Ghost's home is their starting position when the die.  
         - scatterPoints: each entry has an ID and a coordinate [x, y] indicating the location of a scatter point for ghosts.  
         - portals: each entry has an ID and two coordinates [[x1, y1], [x2, y2]] representing the entry and exit points of the portal.  
         - ghosts: each ghost has:

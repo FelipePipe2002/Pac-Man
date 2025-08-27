@@ -1,37 +1,35 @@
 #pragma once
-
 #include "pacman/Board.h"
 #include "pacman/Player.h"
+#include <optional>
 
-class Ghost;
+class Ghost; // forward declaration
 
 struct MovementStrategy
 {
     virtual ~MovementStrategy() = default;
-    virtual void move(Ghost& ghost, Board const& board, Player const& player) = 0;
+    virtual void move(Ghost& ghost, Board const& board, Entity* target) = 0;
+
+protected:
+    Direction findWay(Board const& board, Coordinate startPos, Coordinate targetPos, std::optional<Coordinate> lastPos);
 };
 
-
-//TODO implement this
 struct ChaseBlinky : MovementStrategy
 {
-    void move(Ghost& ghost, Board const& board, Player const& player) override {
-    }
+    void move(Ghost& ghost, Board const& board, Entity* target) override;
 };
 
-struct ScatterCornerTopRight : MovementStrategy
+struct ScatterToScatterPoint : MovementStrategy
 {
-    void move(Ghost& ghost, Board const& board, Player const& player) override {}
+    void move(Ghost& ghost, Board const& board, Entity* target) override;
 };
 
 struct FrightenedRandom : MovementStrategy
 {
-    void move(Ghost& ghost, Board const& board, Player const& player) override {}
+    void move(Ghost& ghost, Board const& board, Entity* target) override;
 };
 
 struct EatenToHome : MovementStrategy
 {
-    void move(Ghost& ghost, Board const& board, Player const& player) override
-    {
-    }
+    void move(Ghost& ghost, Board const& board, Entity* target) override;
 };

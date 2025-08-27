@@ -3,7 +3,9 @@
 #include "pacman/Board.h"
 #include "pacman/Color.h"
 #include "pacman/Coordinate.h"
+#include "pacman/Entity.h"
 #include "pacman/MovementStrategy.h"
+#include "pacman/Entity.h"
 
 enum class GhostState
 {
@@ -15,13 +17,23 @@ enum class GhostState
 
 struct Player;
 
-class Ghost
+class Ghost : public Entity
 {
 public:
-    Ghost(Color color, Coordinate coord) : mColor{color}, mPos{coord} {}
+    Ghost(Color color,
+        Coordinate initPos,
+        Coordinate scatterPoint,
+        std::unique_ptr<MovementStrategy> chaseStrategy,
+        Entity* target)
+    : Entity(initPos), mColor{color}, mScatterPoint{scatterPoint}, mChaseStrategy{std::move(chaseStrategy)}, mTarget{target}
+    {
+        mScatterStrategy = std::make_unique<ScatterToScatterPoint>();
+        mFrightenedStrategy = std::make_unique<FrightenedRandom>();
+        mEatenStrategy = std::make_unique<EatenToHome>();
+    }
     ~Ghost() = default;
 
-    void move(Board const& board, Player const& player);
+    void move(Board const& board) override;
 
     void setState(GhostState newState)
     {
@@ -35,24 +47,21 @@ public:
     {
         return mColor;
     }
-    [[nodiscard]] Coordinate getPos() const
-    {
-        return mPos;
-    }
-    void setPos(Coordinate coord)
-    {
-        mPos = coord;
-    }
     [[nodiscard]] Coordinate getLastPos() const
     {
         return mLastPos;
     }
+    [[nodiscard]] Coordinate getScatterPoint() const
+    {
+        return mScatterPoint;
+    }
 
 private:
     Color mColor;
-    GhostState mState = GhostState::Scatter;
-    Coordinate mPos;
+    GhostState mState = GhostState::Chase;
+    Coordinate mScatterPoint;
     Coordinate mLastPos;
+    Entity* mTarget;
 
     std::unique_ptr<MovementStrategy> mChaseStrategy;
     std::unique_ptr<MovementStrategy> mScatterStrategy;

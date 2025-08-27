@@ -35,6 +35,9 @@ public:
     [[nodiscard]] bool allPointsCollected() const;
 
     [[nodiscard]] Coordinate getPlayerStartingPoint() const;
+    [[nodiscard]] Coordinate getGhostHome() const;
+
+
     [[nodiscard]] std::optional<Coordinate> teleportFrom(Coordinate coord) const;
 
     void setEnabled(Coordinate const& coord, bool enabled);
@@ -55,7 +58,8 @@ private:
     std::vector<std::pair<Coordinate, Coordinate>> mPortals;
     std::map<std::string, Coordinate> mScatterPoints;
 
-    Coordinate mPlayerStartingPoint;
+    Coordinate mGhostHomeCoordinate;
+    Coordinate mPlayerStartingCoordinate;
 
     [[nodiscard]] int coordToPos(int x, int y) const;
     [[nodiscard]] int coordToPos(Coordinate coord) const;

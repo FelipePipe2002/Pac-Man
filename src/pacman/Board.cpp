@@ -1,4 +1,4 @@
-﻿#include "pacman/Board.h"
+#include "pacman/Board.h"
 #include "pacman/Color.h"
 #include "pacman/Coordinate.h"
 #include "pacman/Player.h"
@@ -44,7 +44,13 @@ Board::Board(quicktype::mapJson mapJson)
             }
             else if (cell == 'P')
             {
-                mPlayerStartingPoint = coord;
+                mPlayerStartingCoordinate = coord;
+                setEnabled(coord, true);
+                setPoint(coord, false);
+            }
+            else if(cell == 'H')
+            {
+                mGhostHomeCoordinate = coord;
                 setEnabled(coord, true);
                 setPoint(coord, false);
             }
@@ -172,9 +178,13 @@ bool Board::allPointsCollected() const
 
 Coordinate Board::getPlayerStartingPoint() const
 {
-    return mPlayerStartingPoint;
+    return mPlayerStartingCoordinate;
 }
 
+Coordinate Board::getGhostHome() const
+{
+    return mGhostHomeCoordinate;
+}
 
 std::optional<Coordinate> Board::teleportFrom(Coordinate coord) const
 {
