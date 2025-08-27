@@ -48,7 +48,7 @@ Board::Board(quicktype::mapJson mapJson)
                 setEnabled(coord, true);
                 setPoint(coord, false);
             }
-            else if(cell == 'H')
+            else if (cell == 'H')
             {
                 mGhostHomeCoordinate = coord;
                 setEnabled(coord, true);
@@ -202,6 +202,13 @@ std::optional<Coordinate> Board::teleportFrom(Coordinate coord) const
     return std::nullopt;
 }
 
+[[nodiscard]] std::optional<Coordinate> Board::getScatterPoint(std::string scatterPointId) const
+{
+    auto it = mScatterPoints.find(scatterPointId);
+    if (it != mScatterPoints.end())
+        return it->second;
+    return std::nullopt;
+}
 // ---------- PRIVATE ----------
 
 int Board::coordToPos(int x, int y) const

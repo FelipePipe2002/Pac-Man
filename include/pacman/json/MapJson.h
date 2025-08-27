@@ -254,6 +254,7 @@ namespace quicktype
     inline void from_json(json const& j, ghost& x)
     {
         x.set_id(j.at("id").get<int64_t>());
+        x.set_color(j.at("color").get<std::string>());
         x.set_pos(j.at("pos").get<std::vector<int64_t>>());
         x.set_scatter(j.at("scatter").get<std::string>());
         x.set_mode(j.at("mode").get<std::string>());
@@ -263,6 +264,7 @@ namespace quicktype
     {
         j = json::object();
         j["id"] = x.get_id();
+        j["color"] = x.get_color();
         j["pos"] = x.get_pos();
         j["scatter"] = x.get_scatter();
         j["mode"] = x.get_mode();

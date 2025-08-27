@@ -44,7 +44,7 @@
 	"ghosts": [
 		{"id":1,"color":"NR","pos":[13,8],"scatter":"1","mode":"R"}
         /* Add more as needed, e.g.,
-            {"id":id, "color": "[N|D|L][R|G|Y|B|M|C|W]" ","pos":[x,y],"scatter":"scatterId","mode":"R|P|I|O"}
+            {"id":id, "color": "[N|D|L][R|G|Y|B|M|C|W]" ","pos":[x,y],"scatter":"scatterId","mode":"B|P|C|I"}
 
 			color: can be Normal, Darl or Light variations of Red, Green, Yellow, Blue,Magenta, Cyan and White
         */

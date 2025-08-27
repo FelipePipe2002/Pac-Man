@@ -171,6 +171,8 @@ void ChaseClide::move(Ghost& ghost, Board const& board, Player* target)
     ghost.setPosition(applyDirection(ghost.getPosition(), dir));
 }
 
+void ChaseInki::move(Ghost& ghost, Board const& board, Player* target) {}
+
 // GENERAL MOVEMENT
 void ScatterToScatterPoint::move(Ghost& ghost, Board const& board, Player* target)
 {

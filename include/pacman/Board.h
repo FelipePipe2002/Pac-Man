@@ -39,6 +39,7 @@ public:
 
 
     [[nodiscard]] std::optional<Coordinate> teleportFrom(Coordinate coord) const;
+    [[nodiscard]] std::optional<Coordinate> getScatterPoint(std::string scatterPointId) const;
 
     void setEnabled(Coordinate const& coord, bool enabled);
     void setPoint(Coordinate const& coord, bool enabled);

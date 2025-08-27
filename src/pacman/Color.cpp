@@ -80,3 +80,4 @@ std::string applyColor(Color color, std::string const& toMessage)
     return applyColorPosix(color, toMessage);
 #endif
 }
+

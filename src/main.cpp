@@ -7,9 +7,9 @@
 #include "pacman/Player.h"
 #include "pacman/json/MapJson.h"
 
+#include <chrono>
 #include <cstdlib>
 #include <ctime>
-#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -58,12 +58,47 @@ Board loadMap(std::string const& filename)
     return Board(map_data);
 }
 
+std::vector<std::unique_ptr<Ghost>> loadGhost(std::string const& filename, Board const& board, Player* player)
+{
+    std::ifstream map_file(filename);
+    if (!map_file.is_open())
+    {
+        throw std::runtime_error("No se pudo abrir el archivo de mapa");
+    }
+
+    nlohmann::json j;
+    map_file >> j;
+    quicktype::mapJson map_data = j.get<quicktype::mapJson>();
+
+    std::vector<std::unique_ptr<Ghost>> ghosts; // solo este
+
+    for (quicktype::ghost g : map_data.get_ghosts())
+    {
+        std::cout << "COLOR: " << g.get_color() << '\n';
+        Color color = stringToColor(g.get_color());
+        std::optional<Coordinate> scatterPointCoord = board.getScatterPoint(g.get_scatter());
+        std::unique_ptr<MovementStrategy> strategy = strategyFromString(g.get_mode());
+        auto optCoord = makeCoordinate(g.get_pos());
+
+        if (!scatterPointCoord || strategy == nullptr || !optCoord)
+        {
+            continue;
+        }
+
+        ghosts.push_back(
+            std::make_unique<Ghost>(color, optCoord.value(), scatterPointCoord.value(), std::move(strategy), player));
+    }
+
+    return ghosts;
+}
+
+
 static void moveCursorHome()
 {
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 0});
 }
 
-static void drawGrid(Player& player, Ghost& ghost, Board const& board)
+static void drawGrid(Player& player, std::vector<std::unique_ptr<Ghost>>& ghosts, Board const& board)
 {
     std::ostringstream frame;
     frame << "ESC: quit | WASD: move\n\n";
@@ -77,11 +112,7 @@ static void drawGrid(Player& player, Ghost& ghost, Board const& board)
         {
             Coordinate actualPos(x, y);
             std::string symbol;
-            if (player.getPosition() == actualPos)
-            {
-                symbol = applyColor(Color::Yellow, player.getSymbol());
-            }
-            else if (!board.isEnabled(actualPos))
+            if (!board.isEnabled(actualPos))
             {
                 symbol = applyColor(Color::Blue, "██");
             }
@@ -94,8 +125,16 @@ static void drawGrid(Player& player, Ghost& ghost, Board const& board)
                 symbol = "  ";
             }
 
-            if (actualPos == ghost.getPosition())
-                symbol = applyColor(ghost.getColor(), "👻");
+            for (auto& ghost : ghosts)
+            {
+                if (actualPos == ghost->getPosition())
+                    symbol = applyColor(ghost->getColor(), "👻");
+            }
+
+            if (player.getPosition() == actualPos)
+            {
+                symbol = applyColor(Color::Yellow, player.getSymbol());
+            }
 
             frame << symbol;
         }
@@ -150,18 +189,20 @@ int main()
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &ci);
 
     using clock = std::chrono::steady_clock;
-    constexpr auto kFrame = std::chrono::milliseconds(300);
+    int counter = 0;
+    constexpr auto kFrame = std::chrono::milliseconds(100);    
 
     srand(time(NULL));
 
     // GAME
     Board board = loadMap("../assets/map1.json");
     Player player(board.getPlayerStartingPoint(), Direction::None);
-    Ghost ghost(Color::Blue, Coordinate(26, 20), Coordinate(1, 2), std::make_unique<ChaseClide>(), &player);
+    std::vector<std::unique_ptr<Ghost>> ghosts = loadGhost("../assets/map1.json", board, &player);
     Direction dirBuffer = Direction::None;
 
     while (true)
     {
+
         auto const now = clock::now();
 
         // EXIT
@@ -187,11 +228,15 @@ int main()
         }
 
         // GHOSTS MOVEMENT
-        ghost.update(board);
+        for (auto& ghost : ghosts)
+        {
+            ghost->update(board);
+        }
+
 
         // RENDER
         moveCursorHome();
-        drawGrid(player, ghost, board);
+        drawGrid(player, ghosts, board);
 
         // CHECK FOR WIN
         if (board.allPointsCollected())

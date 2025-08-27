@@ -29,6 +29,11 @@ struct ChaseClide : MovementStrategy
     void move(Ghost& ghost, Board const& board, Player* target) override;
 };
 
+struct ChaseInki : MovementStrategy
+{
+    void move(Ghost& ghost, Board const& board, Player* target) override;
+};
+
 
 struct ScatterToScatterPoint : MovementStrategy
 {
@@ -44,3 +49,23 @@ struct EatenToHome : MovementStrategy
 {
     void move(Ghost& ghost, Board const& board, Player* target) override;
 };
+
+inline std::unique_ptr<MovementStrategy> strategyFromString(std::string const& s)
+{
+    if (s.empty())
+        return nullptr;
+
+    switch (s[0])
+    {
+    case 'B':
+        return std::make_unique<ChaseBlinky>();
+    case 'P':
+        return std::make_unique<ChasePinky>();
+    case 'C':
+        return std::make_unique<ChaseClide>();
+    case 'I':
+        return std::make_unique<ChaseInki>();
+    default:
+        return nullptr;
+    }
+}

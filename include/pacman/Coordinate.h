@@ -1,5 +1,7 @@
 #pragma once
 #include <ostream>
+#include <vector>
+#include <optional>
 
 struct Coordinate
 {
@@ -20,6 +22,14 @@ inline bool operator==(Coordinate const& lhs, Coordinate const& rhs)
 inline bool operator<(Coordinate const& lhs, Coordinate const& rhs)
 {
     return (lhs.x < rhs.x) || (lhs.x == rhs.x && lhs.y < rhs.y);
+}
+
+inline std::optional<Coordinate> makeCoordinate(std::vector<int64_t> const& posVec)
+{
+    if (posVec.size() != 2)
+        return std::nullopt;
+
+    return Coordinate{static_cast<int>(posVec[0]), static_cast<int>(posVec[1])};
 }
 
 inline int hashCoord(Coordinate c, int width)
