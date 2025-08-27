@@ -12,15 +12,18 @@ public:
     {
         move(board);
 
-        auto optPortal = board.teleportFrom(mPos);
-        if (optPortal.has_value())
+
+        if (!optNewPos.has_value())
         {
-            mPos = optPortal.value();
-            justTeleported = true;
+            optNewPos = board.teleportFrom(mPos);
         }
         else
         {
-            justTeleported = false;
+            if (optNewPos)
+            {
+                mPos = optNewPos.value();
+            }
+            optNewPos = std::nullopt;
         }
     }
 
@@ -38,5 +41,7 @@ public:
 
 protected:
     Coordinate mPos;
-    bool justTeleported = false;
+
+private:
+    std::optional<Coordinate> optNewPos = std::nullopt;
 };

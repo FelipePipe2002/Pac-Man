@@ -5,8 +5,6 @@
 #include "pacman/Coordinate.h"
 #include "pacman/Entity.h"
 #include "pacman/MovementStrategy.h"
-#include "pacman/Entity.h"
-
 enum class GhostState
 {
     Chase,
@@ -24,7 +22,7 @@ public:
         Coordinate initPos,
         Coordinate scatterPoint,
         std::unique_ptr<MovementStrategy> chaseStrategy,
-        Entity* target)
+        Player* target)
     : Entity(initPos), mColor{color}, mScatterPoint{scatterPoint}, mChaseStrategy{std::move(chaseStrategy)}, mTarget{target}
     {
         mScatterStrategy = std::make_unique<ScatterToScatterPoint>();
@@ -43,10 +41,17 @@ public:
     {
         return mState;
     }
+
     [[nodiscard]] Color getColor() const
     {
         return mColor;
     }
+
+    void setColor(Color color)
+    {
+        mColor = color;
+    }
+
     [[nodiscard]] Coordinate getLastPos() const
     {
         return mLastPos;
@@ -61,7 +66,7 @@ private:
     GhostState mState = GhostState::Chase;
     Coordinate mScatterPoint;
     Coordinate mLastPos;
-    Entity* mTarget;
+    Player* mTarget;
 
     std::unique_ptr<MovementStrategy> mChaseStrategy;
     std::unique_ptr<MovementStrategy> mScatterStrategy;

@@ -35,6 +35,7 @@ namespace quicktype
 
     private:
         int64_t id;
+        std::string color;
         std::vector<int64_t> pos;
         std::string scatter;
         std::string mode;
@@ -51,6 +52,19 @@ namespace quicktype
         void set_id(int64_t const& value)
         {
             this->id = value;
+        }
+
+        std::string const& get_color() const
+        {
+            return color;
+        }
+        std::string& get_mutable_color()
+        {
+            return color;
+        }
+        void set_color(std::string const& value)
+        {
+            this->color = value;
         }
 
         std::vector<int64_t> const& get_pos() const

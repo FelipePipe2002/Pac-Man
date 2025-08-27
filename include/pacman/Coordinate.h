@@ -22,6 +22,11 @@ inline bool operator<(Coordinate const& lhs, Coordinate const& rhs)
     return (lhs.x < rhs.x) || (lhs.x == rhs.x && lhs.y < rhs.y);
 }
 
+inline int hashCoord(Coordinate c, int width)
+{
+    return c.y * width + c.x;
+}
+
 inline size_t hashCoord(Coordinate const &coord) noexcept
 {
     size_t xHash = std::hash<int>()(coord.x);

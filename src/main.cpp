@@ -7,6 +7,8 @@
 #include "pacman/Player.h"
 #include "pacman/json/MapJson.h"
 
+#include <cstdlib>
+#include <ctime>
 #include <chrono>
 #include <fstream>
 #include <iostream>
@@ -150,11 +152,12 @@ int main()
     using clock = std::chrono::steady_clock;
     constexpr auto kFrame = std::chrono::milliseconds(300);
 
+    srand(time(NULL));
 
     // GAME
     Board board = loadMap("../assets/map1.json");
     Player player(board.getPlayerStartingPoint(), Direction::None);
-    Ghost ghost(Color::Red, Coordinate(26, 20), Coordinate(1, 2), std::make_unique<ChaseBlinky>(), &player);
+    Ghost ghost(Color::Blue, Coordinate(26, 20), Coordinate(1, 2), std::make_unique<ChaseClide>(), &player);
     Direction dirBuffer = Direction::None;
 
     while (true)

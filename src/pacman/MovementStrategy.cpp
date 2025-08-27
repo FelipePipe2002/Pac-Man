@@ -1,5 +1,8 @@
 #include "pacman/MovementStrategy.h"
 #include "pacman/Ghost.h"
+
+#include <cstdlib>
+#include <math.h>
 #include <queue>
 #include <unordered_map>
 
@@ -105,13 +108,9 @@ Coordinate applyDirection(Coordinate pos, Direction dir)
     }
 }
 
-void ScatterToScatterPoint::move(Ghost& ghost, Board const& board, Entity* target)
-{
-    Direction dir = findWay(board, ghost.getPosition(), ghost.getScatterPoint(), ghost.getLastPos());
-    ghost.setPosition(applyDirection(ghost.getPosition(), dir));
-}
 
-void ChaseBlinky::move(Ghost& ghost, Board const& board, Entity* target)
+// CHASE TYPES OF MOVEMENT
+void ChaseBlinky::move(Ghost& ghost, Board const& board, Player* target)
 {
     if (!target)
     {
@@ -121,12 +120,104 @@ void ChaseBlinky::move(Ghost& ghost, Board const& board, Entity* target)
     ghost.setPosition(applyDirection(ghost.getPosition(), dir));
 }
 
-void FrightenedRandom::move(Ghost& ghost, Board const& board, Entity* target)
+void ChasePinky::move(Ghost& ghost, Board const& board, Player* target)
 {
-    // Implementación
+    if (!target)
+    {
+        return;
+    }
+    Coordinate targetPos = target->getPosition();
+    switch (target->getDirection())
+    {
+    case Direction::Up:
+    {
+        targetPos.y -= 2;
+    }
+    case Direction::Down:
+    {
+        targetPos.y += 2;
+    }
+    case Direction::Left:
+    {
+        targetPos.x -= 2;
+    }
+    case Direction::Right:
+    {
+        targetPos.x += 2;
+    }
+    }
+
+    Direction dir = findWay(board, ghost.getPosition(), targetPos, ghost.getLastPos());
+    ghost.setPosition(applyDirection(ghost.getPosition(), dir));
 }
 
-void EatenToHome::move(Ghost& ghost, Board const& board, Entity* target)
+void ChaseClide::move(Ghost& ghost, Board const& board, Player* target)
+{
+    if (!target)
+    {
+        return;
+    }
+    Coordinate targetPos = target->getPosition();
+    Coordinate ghostPos = ghost.getPosition();
+    Direction dir = Direction::None;
+    int dx = targetPos.x - ghostPos.x;
+    int dy = targetPos.y - ghostPos.y;
+    int dist2 = dx * dx + dy * dy;
+    if (dist2 >= 64)
+        dir = findWay(board, ghost.getPosition(), targetPos, ghost.getLastPos());
+    else
+        dir = findWay(board, ghost.getPosition(), ghost.getScatterPoint(), ghost.getLastPos());
+
+    ghost.setPosition(applyDirection(ghost.getPosition(), dir));
+}
+
+// GENERAL MOVEMENT
+void ScatterToScatterPoint::move(Ghost& ghost, Board const& board, Player* target)
+{
+    Direction dir = findWay(board, ghost.getPosition(), ghost.getScatterPoint(), ghost.getLastPos());
+    ghost.setPosition(applyDirection(ghost.getPosition(), dir));
+}
+
+void FrightenedRandom::move(Ghost& ghost, Board const& board, Player* target)
+{
+    ghost.setColor(Color::DarkBlue);
+
+    Direction randomDir = Direction::None;
+    Coordinate newPos;
+    do
+    {
+        int intRandomDir = rand() % 4;
+
+        switch (intRandomDir)
+        {
+        case 0:
+            randomDir = Direction::Up;
+            break;
+        case 1:
+            randomDir = Direction::Down;
+            break;
+        case 2:
+            randomDir = Direction::Left;
+            break;
+        case 3:
+            randomDir = Direction::Right;
+            break;
+        default:
+            randomDir = Direction::None;
+            break;
+        }
+
+        newPos = applyDirection(ghost.getPosition(), randomDir);
+    } while (newPos == ghost.getLastPos());
+
+
+    if (board.isEnabled(newPos))
+    {
+        ghost.setPosition(newPos);
+    }
+}
+
+void EatenToHome::move(Ghost& ghost, Board const& board, Player* target)
 {
     Direction dir = findWay(board, ghost.getPosition(), board.getGhostHome(), ghost.getLastPos());
     ghost.setPosition(applyDirection(ghost.getPosition(), dir));
