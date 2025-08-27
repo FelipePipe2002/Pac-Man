@@ -2,7 +2,7 @@
 
 #include "pacman/Coordinate.h"
 #include "pacman/StrongType.h"
-#include "pacman/MapJson.h"
+#include "pacman/json/MapJson.h"
 #include <functional>
 #include <string>
 #include <vector>
@@ -12,33 +12,33 @@ using Width = StrongType<int, struct WidthTag>;
 using Height = StrongType<int, struct HeightTag>;
 using Rng = std::function<int(int, int)>;
 
+struct Player;
+
+std::string readId(std::string const& line, int& index);
+
 class Board
 {
 public:
     Board(quicktype::mapJson mapJson);
 
-    [[nodiscard]] bool isEnabled(Coordinate const& coord) const;
-    [[nodiscard]] void setEnabled(Coordinate const& coord, bool enabled);
-
-    [[nodiscard]] bool hasPoint(Coordinate const& coord) const;
-    [[nodiscard]] void setPoint(Coordinate const& coord, bool enabled);
-    [[nodiscard]] bool allPointsCollected() const;
-
-    [[nodiscard]] Coordinate PlayerStratingPoint() const;
-
-    void reset();
-
     [[nodiscard]] Width getWidth() const noexcept
     {
         return mWidth;
-    };
-
+    }
     [[nodiscard]] Height getHeight() const noexcept
     {
         return mHeight;
     }
 
+    [[nodiscard]] bool isEnabled(Coordinate const& coord) const;
+    [[nodiscard]] bool hasPoint(Coordinate const& coord) const;
+    [[nodiscard]] bool allPointsCollected() const;
+
+    [[nodiscard]] Coordinate getPlayerStartingPoint() const;
     [[nodiscard]] std::optional<Coordinate> teleportFrom(Coordinate coord) const;
+
+    void setEnabled(Coordinate const& coord, bool enabled);
+    void setPoint(Coordinate const& coord, bool enabled);
 
 private:
     struct Tile
@@ -50,14 +50,15 @@ private:
     Width mWidth{1};
     Height mHeight{1};
     std::vector<Tile> mMatrix;
+
+    //Game elements
     std::vector<std::pair<Coordinate, Coordinate>> mPortals;
-    std::vector<Coordinate> mScatterPoints;
+    std::map<std::string, Coordinate> mScatterPoints;
 
     Coordinate mPlayerStartingPoint;
 
     [[nodiscard]] int coordToPos(int x, int y) const;
     [[nodiscard]] int coordToPos(Coordinate coord) const;
-
     [[nodiscard]] bool isInBounds(Coordinate const& coord) const noexcept;
 
     static constexpr Width kDefaultSizeX{24};

@@ -1,0 +1,66 @@
+{
+	"name": "Classic Map",
+	"width": 28,
+	"height": 22,
+	"layout": [
+		"############################",
+		"#............##............#",
+		"#.####.#####.##.#####.####.#",
+		"#.####.#####.##.#####.####.#",
+		"#..........................#",
+		"#.####.##.########.##.####.#",
+		"#......##....##....##......#",
+		"######.##### ## #####.######",
+		"     #.##          ##.#     ",
+		"######.## ###  ### ##.######",
+		"      .   #      #   .      ",
+		"######.## ######## ##.######",
+		"     #.##    P     ##.#     ",
+		"######.## ######## ##.######",
+		"#............##............#",
+		"#.####.#####.##.#####.####.#",
+		"#...##................##...#",
+		"###.##.##.########.##.##.###",
+		"#......##....##....##......#",
+		"#.##########.##.##########.#",
+		"#..........................#",
+		"############################"
+	],
+	"scatterPoints": {
+		"1": [1,2],
+		"2": [26,2],
+		"3": [1,19],
+		"4": [26,19],
+        /* Add more as needed, e.g.,
+            "id": [x, y]
+        */
+	},
+	"portals": {
+		"1": [[0,10],[27,10]],
+        /* Add more as needed, e.g.,
+            "id": [[x1, y1],[x2, y2]]
+        */
+	},
+	"ghosts": [
+		{"id":1,"pos":[13,8],"scatter":"1","mode":"R"}
+        /* Add more as needed, e.g.,
+            {"id":id,"pos":[x,y],"scatter":"scatterId","mode":"R|P|I|O"}
+        */
+	],
+    "_comment": "
+        Map structure explanation:
+
+        - The layout only contains walls (#), collectible points (.), empty spaces ( ), and the player's starting position (P).  
+        - scatterPoints: each entry has an ID and a coordinate [x, y] indicating the location of a scatter point for ghosts.  
+        - portals: each entry has an ID and two coordinates [[x1, y1], [x2, y2]] representing the entry and exit points of the portal.  
+        - ghosts: each ghost has:
+            - id: ghost identifier
+            - pos: starting coordinate [x, y]
+            - scatter: the ID of the scatter point it will go to in scatter mode
+            - mode: the ghost's Chase mode strategy:
+                - R: Blinky (red) - directly chases Pac-Man
+                - P: Pinky (pink) - targets 4 tiles ahead of Pac-Man
+                - I: Inky (cyan) - calculates a vector using Pac-Man and Blinky
+                - O: Clyde (orange) - chases Pac-Man if far, moves to corner if near
+  "
+}

@@ -1,48 +1,19 @@
-﻿#pragma  once
+﻿#pragma once
 
-#include "pacman/Direction.h"
+#include "pacman/Board.h"
 #include "pacman/Coordinate.h"
+#include "pacman/Direction.h"
+
+#include <string>
 
 struct Player
 {
-    Coordinate pos = Coordinate(0, 0);
-    Direction dir = Direction::None;
+    Coordinate pos{0, 0};
+    Direction dir{Direction::None};
 
-    std::string getSymbol()
-    {
-        if (dir == Direction::Right)
-        {
-            symbol = "🌜";
-        }
-        else if (dir == Direction::Left)
-        {
-            symbol = "🌛";
-        }
-        return symbol;
-    }
+    Player(Coordinate const& startPos, Direction startDir) : pos(startPos), dir(startDir) {}
 
-    Coordinate move()
-    {
-        switch (dir)
-        {
-        case Direction::Up:
-            pos.y--;
-            break;
-        case Direction::Down:
-            pos.y++;
-            break;
-        case Direction::Left:
-            pos.x--;
-            break;
-        case Direction::Right:
-            pos.x++;
-            break;
-        default:
-            break;
-        }
-        return pos;
-    }
+    [[nodiscard]] std::string getSymbol() const;
 
-private:
-    std::string symbol = "🌜";
+    void move(Board const& board);
 };
