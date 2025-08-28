@@ -1,12 +1,12 @@
 #pragma once
 
-#include "pacman/Coordinate.h"
-#include "pacman/StrongType.h"
+#include "pacman/utils/Coordinate.h"
+#include "pacman/utils/StrongType.h"
 #include "pacman/json/MapJson.h"
 #include <functional>
+#include <optional>
 #include <string>
 #include <vector>
-#include <optional>
 
 using Width = StrongType<int, struct WidthTag>;
 using Height = StrongType<int, struct HeightTag>;
@@ -32,23 +32,30 @@ public:
 
     [[nodiscard]] bool isEnabled(Coordinate const& coord) const;
     [[nodiscard]] bool hasPoint(Coordinate const& coord) const;
+    [[nodiscard]] bool hasAPellet(Coordinate const& coord) const;
+    [[nodiscard]] bool hasFruit(Coordinate const& coord) const;
+
     [[nodiscard]] bool allPointsCollected() const;
+
 
     [[nodiscard]] Coordinate getPlayerStartingPoint() const;
     [[nodiscard]] Coordinate getGhostHome() const;
-
 
     [[nodiscard]] std::optional<Coordinate> teleportFrom(Coordinate coord) const;
     [[nodiscard]] std::optional<Coordinate> getScatterPoint(std::string scatterPointId) const;
 
     void setEnabled(Coordinate const& coord, bool enabled);
     void setPoint(Coordinate const& coord, bool enabled);
+    void setPellet(Coordinate const& coord, bool enabled);
+    void setFruit(Coordinate const& coord, bool enabled);
 
 private:
     struct Tile
     {
         bool mEnabled = true;
         bool mPoint = false;
+        bool mPellet = false;
+        bool mFruit = false;
     };
 
     Width mWidth{1};

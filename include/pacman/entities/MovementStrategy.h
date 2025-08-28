@@ -1,9 +1,11 @@
 #pragma once
 #include "pacman/Board.h"
-#include "pacman/Player.h"
+#include "pacman/Entities/Player.h"
+#include "pacman/utils/Direction.h"
 #include <optional>
+#include <iostream>
 
-class Ghost; // forward declaration
+class Ghost;
 
 struct MovementStrategy
 {

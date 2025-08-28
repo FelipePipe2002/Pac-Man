@@ -1,4 +1,4 @@
-#include "pacman/Player.h"
+#include "pacman/Entities/Player.h"
 
 std::string Player::getSymbol() const
 {
@@ -15,6 +15,7 @@ std::string Player::getSymbol() const
 
 void Player::move(Board const& board)
 {
+
     Coordinate newPos = mPos;
 
     switch (dir)
@@ -37,6 +38,16 @@ void Player::move(Board const& board)
 
     if (board.isEnabled(newPos))
     {
+        mLastPos = mPos;
         mPos = newPos;
     }
+}
+
+Direction Player::getDirection() const
+{
+    return dir;
+}
+void Player::setDirection(Direction newDir)
+{
+    dir = newDir;
 }

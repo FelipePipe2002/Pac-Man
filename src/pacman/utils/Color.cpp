@@ -1,4 +1,4 @@
-#include "pacman/Color.h"
+#include "pacman/utils/Color.h"
 
 char const* colorString(Color forColor)
 {
@@ -55,6 +55,8 @@ char const* colorString(Color forColor)
     case Color::LightWhite:
         return "\033[1;97m";
 
+    case Color::Black:
+        return "\033[0;30m";
     default:
         return "\033[0m";
     }

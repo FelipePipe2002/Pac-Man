@@ -1,9 +1,9 @@
 #pragma once
 
 #include "pacman/Board.h"
-#include "pacman/Coordinate.h"
-#include "pacman/Direction.h"
-#include "pacman/Entity.h"
+#include "pacman/utils/Coordinate.h"
+#include "pacman/utils/Direction.h"
+#include "pacman/Entities/Entity.h"
 #include <string>
 
 class Player : public Entity
@@ -15,14 +15,8 @@ public:
 
     void move(Board const& board) override;
 
-    Direction getDirection() const
-    {
-        return dir;
-    }
-    void setDirection(Direction newDir)
-    {
-        dir = newDir;
-    }
+    Direction getDirection() const;
+    void setDirection(Direction newDir);
 
 private:
     Direction dir{Direction::None};

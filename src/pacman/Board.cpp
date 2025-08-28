@@ -1,7 +1,7 @@
+#include "pacman/utils/Color.h"
+#include "pacman/utils/Coordinate.h"
+#include "pacman/Entities/Player.h"
 #include "pacman/Board.h"
-#include "pacman/Color.h"
-#include "pacman/Coordinate.h"
-#include "pacman/Player.h"
 
 #include <algorithm>
 #include <iostream>
@@ -117,6 +117,7 @@ Board::Board(quicktype::mapJson mapJson)
             continue;
         }
 
+        setPellet(c, true);
         mScatterPoints[key] = c;
     }
 }
@@ -143,15 +144,6 @@ bool Board::isEnabled(Coordinate const& coord) const
     return mMatrix[coordToPos(coord)].mEnabled;
 }
 
-void Board::setEnabled(Coordinate const& coord, bool enabled)
-{
-    if (!isInBounds(coord))
-    {
-        return;
-    }
-    mMatrix[coordToPos(coord)].mEnabled = enabled;
-}
-
 
 bool Board::hasPoint(Coordinate const& coord) const
 {
@@ -162,19 +154,30 @@ bool Board::hasPoint(Coordinate const& coord) const
     return mMatrix[coordToPos(coord)].mPoint;
 }
 
-void Board::setPoint(Coordinate const& coord, bool enabled)
+bool Board::hasAPellet(Coordinate const& coord) const
 {
     if (!isInBounds(coord))
     {
-        return;
+        return false;
     }
-    mMatrix[coordToPos(coord)].mPoint = enabled;
+    return mMatrix[coordToPos(coord)].mPellet;
+
+}
+
+bool Board::hasFruit(Coordinate const& coord) const
+{
+    if (!isInBounds(coord))
+    {
+        return false;
+    }
+    return mMatrix[coordToPos(coord)].mFruit;
 }
 
 bool Board::allPointsCollected() const
 {
     return std::all_of(mMatrix.begin(), mMatrix.end(), [](Tile const& t) { return !t.mPoint || !t.mEnabled; });
 }
+
 
 Coordinate Board::getPlayerStartingPoint() const
 {
@@ -209,6 +212,43 @@ std::optional<Coordinate> Board::teleportFrom(Coordinate coord) const
         return it->second;
     return std::nullopt;
 }
+
+void Board::setEnabled(Coordinate const& coord, bool enabled)
+{
+    if (!isInBounds(coord))
+    {
+        return;
+    }
+    mMatrix[coordToPos(coord)].mEnabled = enabled;
+}
+
+void Board::setPoint(Coordinate const& coord, bool enabled)
+{
+    if (!isInBounds(coord))
+    {
+        return;
+    }
+    mMatrix[coordToPos(coord)].mPoint = enabled;
+}
+
+void Board::setPellet(Coordinate const& coord, bool enabled)
+{
+    if (!isInBounds(coord))
+    {
+        return;
+    }
+    mMatrix[coordToPos(coord)].mPellet = enabled;
+}
+
+void Board::setFruit(Coordinate const& coord, bool enabled)
+{
+    if (!isInBounds(coord))
+    {
+        return;
+    }
+    mMatrix[coordToPos(coord)].mFruit = enabled;
+}
+
 // ---------- PRIVATE ----------
 
 int Board::coordToPos(int x, int y) const

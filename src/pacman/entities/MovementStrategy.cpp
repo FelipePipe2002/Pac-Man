@@ -1,10 +1,11 @@
-#include "pacman/MovementStrategy.h"
-#include "pacman/Ghost.h"
+#include "pacman/Entities/MovementStrategy.h"
+#include "pacman/Entities/Ghost.h"
+#include "pacman/entities/Player.h"
 
 #include <cstdlib>
-#include <math.h>
 #include <queue>
 #include <unordered_map>
+#include <random>
 
 Direction MovementStrategy::findWay(
     Board const& board, Coordinate startPos, Coordinate targetPos, std::optional<Coordinate> lastPos)
@@ -116,7 +117,7 @@ void ChaseBlinky::move(Ghost& ghost, Board const& board, Player* target)
     {
         return;
     }
-    Direction dir = findWay(board, ghost.getPosition(), target->getPosition(), ghost.getLastPos());
+    Direction dir = findWay(board, ghost.getPosition(), target->getPosition(), ghost.getLastPosition());
     ghost.setPosition(applyDirection(ghost.getPosition(), dir));
 }
 
@@ -147,7 +148,7 @@ void ChasePinky::move(Ghost& ghost, Board const& board, Player* target)
     }
     }
 
-    Direction dir = findWay(board, ghost.getPosition(), targetPos, ghost.getLastPos());
+    Direction dir = findWay(board, ghost.getPosition(), targetPos, ghost.getLastPosition());
     ghost.setPosition(applyDirection(ghost.getPosition(), dir));
 }
 
@@ -164,9 +165,9 @@ void ChaseClide::move(Ghost& ghost, Board const& board, Player* target)
     int dy = targetPos.y - ghostPos.y;
     int dist2 = dx * dx + dy * dy;
     if (dist2 >= 64)
-        dir = findWay(board, ghost.getPosition(), targetPos, ghost.getLastPos());
+        dir = findWay(board, ghost.getPosition(), targetPos, ghost.getLastPosition());
     else
-        dir = findWay(board, ghost.getPosition(), ghost.getScatterPoint(), ghost.getLastPos());
+        dir = findWay(board, ghost.getPosition(), ghost.getScatterPoint(), ghost.getLastPosition());
 
     ghost.setPosition(applyDirection(ghost.getPosition(), dir));
 }
@@ -176,7 +177,7 @@ void ChaseInki::move(Ghost& ghost, Board const& board, Player* target) {}
 // GENERAL MOVEMENT
 void ScatterToScatterPoint::move(Ghost& ghost, Board const& board, Player* target)
 {
-    Direction dir = findWay(board, ghost.getPosition(), ghost.getScatterPoint(), ghost.getLastPos());
+    Direction dir = findWay(board, ghost.getPosition(), ghost.getScatterPoint(), ghost.getLastPosition());
     ghost.setPosition(applyDirection(ghost.getPosition(), dir));
 }
 
@@ -184,43 +185,22 @@ void FrightenedRandom::move(Ghost& ghost, Board const& board, Player* target)
 {
     ghost.setColor(Color::DarkBlue);
 
-    Direction randomDir = Direction::None;
-    Coordinate newPos;
-    do
-    {
-        int intRandomDir = rand() % 4;
+    std::vector<Direction> dirs = {Direction::Up, Direction::Down, Direction::Left, Direction::Right};
+    std::shuffle(dirs.begin(), dirs.end(), std::mt19937{std::random_device{}()});
 
-        switch (intRandomDir)
+    for (auto dir : dirs)
+    {
+        Coordinate newPos = applyDirection(ghost.getPosition(), dir);
+        if (board.isEnabled(newPos) && newPos != ghost.getLastPosition())
         {
-        case 0:
-            randomDir = Direction::Up;
-            break;
-        case 1:
-            randomDir = Direction::Down;
-            break;
-        case 2:
-            randomDir = Direction::Left;
-            break;
-        case 3:
-            randomDir = Direction::Right;
-            break;
-        default:
-            randomDir = Direction::None;
-            break;
+            ghost.setPosition(newPos);
+            return;
         }
-
-        newPos = applyDirection(ghost.getPosition(), randomDir);
-    } while (newPos == ghost.getLastPos());
-
-
-    if (board.isEnabled(newPos))
-    {
-        ghost.setPosition(newPos);
     }
 }
 
 void EatenToHome::move(Ghost& ghost, Board const& board, Player* target)
 {
-    Direction dir = findWay(board, ghost.getPosition(), board.getGhostHome(), ghost.getLastPos());
+    Direction dir = findWay(board, ghost.getPosition(), board.getGhostHome(), ghost.getLastPosition());
     ghost.setPosition(applyDirection(ghost.getPosition(), dir));
 }

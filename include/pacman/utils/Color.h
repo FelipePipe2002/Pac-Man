@@ -5,7 +5,6 @@
 enum class Color
 {
     Default,
-
     // Colores brillantes
     Red,
     Green,
@@ -31,7 +30,9 @@ enum class Color
     LightBlue,
     LightMagenta,
     LightCyan,
-    LightWhite
+    LightWhite,
+
+    Black
 };
 
 
