@@ -7,12 +7,12 @@ namespace gameLogic
 
     GameData initGame(std::string mapFile)
     {
-        Board board = loadMap("../assets/map1.json");
+        Board board = loadMap(mapFile);
         GameData gameData{std::move(board), Player({0, 0}, Direction::None), {}};
 
         gameData.player = Player(gameData.board.getPlayerStartingPoint(), Direction::None);
 
-        gameData.ghosts = loadGhost("../assets/map1.json", gameData.board, &gameData.player);
+        gameData.ghosts = loadGhost(mapFile, gameData.board, &gameData.player);
 
         return gameData;
     }
@@ -26,8 +26,21 @@ namespace gameLogic
         gameData.gameTime = std::chrono::system_clock::now();
     }
 
+    void updateFrameCounters(GameData& gameData)
+    {
+        gameData.pacmanCounter++;
+        gameData.ghostCounter++;
+        gameData.frightenedCounter++;
+        gameData.eatenCounter++;
+    }
+
+
     void handlePlayerMovement(GameData& gameData, Player& player)
     {
+        if (gameData.pacmanCounter < GameData::pacmanFrames)
+            return;
+
+        gameData.pacmanCounter = 0;
         // PLAYER MOVEMENT
         player.update(gameData.board);
 
@@ -52,12 +65,32 @@ namespace gameLogic
         }
     }
 
-    void handleGhostsMovement(Board& board, std::vector<std::unique_ptr<Ghost>>& ghosts)
+    void handleGhostsMovement(GameData& gameData, std::vector<std::unique_ptr<Ghost>>& ghosts)
     {
         for (auto& ghost : ghosts)
         {
-            ghost->update(board);
+            if ((ghost->getState() == GhostState::Scatter || ghost->getState() == GhostState::Chase)
+                && gameData.ghostCounter >= GameData::ghostFrames)
+            {
+                ghost->update(gameData.board);
+            }
+            else if (ghost->getState() == GhostState::Frightened
+                     && gameData.frightenedCounter >= GameData::frightenedFrames)
+            {
+                ghost->update(gameData.board);
+            }
+            else if (ghost->getState() == GhostState::Eaten && gameData.eatenCounter >= GameData::eatenFrames)
+            {
+                ghost->update(gameData.board);
+            }
         }
+
+        if (gameData.ghostCounter >= GameData::ghostFrames)
+            gameData.ghostCounter = 0;
+        if (gameData.frightenedCounter >= GameData::frightenedFrames)
+            gameData.frightenedCounter = 0;
+        if (gameData.eatenCounter >= GameData::eatenFrames)
+            gameData.eatenCounter = 0;
     }
 
     void handleGhostBehavior(GameData& gameData)
@@ -68,7 +101,7 @@ namespace gameLogic
             auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - gameData.gameTime).count();
             GhostState aux = gameData.state;
 
-            if (gameData.state == GhostState::Scatter && elapsed >= 8) //8s of dscatter
+            if (gameData.state == GhostState::Scatter && elapsed >= 7) //7s of dscatter
             {
                 gameData.state = GhostState::Chase;
                 gameData.gameTime = std::chrono::system_clock::now();
@@ -85,7 +118,7 @@ namespace gameLogic
                     ghost->setState(gameData.state);
                 }
             }
-        } 
+        }
 
         for (auto& ghost : gameData.ghosts)
         {
@@ -97,27 +130,7 @@ namespace gameLogic
         }
     }
 
-    void checkPelletFinish(GameData& gameData)
-    {
-        if (!gameData.pelletEaten)
-            return;
-
-        auto now = std::chrono::system_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - gameData.pelletTime).count();
-
-        if (8 <= elapsed)
-        {
-            for (auto& ghost : gameData.ghosts)
-            {
-                ghost->setColor(ghost->getOriginalColor());
-                ghost->setState(GhostState::Scatter);
-            }
-            gameData.pelletEaten = false;
-            gameData.ghostPointMultiplier = 1;
-        }
-    }
-
-    void handleGhostEaten(GameData &gameData)
+    void handleGhostEaten(GameData& gameData)
     {
         if (gameData.pelletEaten)
         {
@@ -130,6 +143,78 @@ namespace gameLogic
                     gameData.ghostPointMultiplier *= 2;
                 }
             }
+        }
+    }
+
+    void endFrightenedMode(GameData& gameData)
+    {
+        if (!gameData.pelletEaten)
+            return;
+
+        auto now = std::chrono::system_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - gameData.pelletTime).count();
+
+        if (8 <= elapsed)
+        {
+            for (auto& ghost : gameData.ghosts)
+            {
+                if (ghost->getState() == GhostState::Frightened)
+                {
+                    ghost->setColor(ghost->getOriginalColor());
+                    ghost->setState(GhostState::Scatter);
+                }
+            }
+            gameData.pelletEaten = false;
+            gameData.ghostPointMultiplier = 1;
+        }
+    }
+
+
+    void handleFruit(GameData& gameData)
+    {
+        float percentPoints = 100.f * (gameData.board.getTotalPoints() - gameData.board.getLeftPoints())
+                              / float(gameData.board.getTotalPoints());
+
+        auto now = std::chrono::system_clock::now();
+
+        if (!gameData.fruitActive && gameData.fruitAppearanceCount == 0 && percentPoints >= 65.f)
+        {
+            gameData.board.setFruit(gameData.board.getPlayerStartingPoint(), true);
+            gameData.fruitActive = true;
+            gameData.fruitSpawnTime = now;
+            gameData.fruitAppearanceCount = 1;
+        }
+        else if (!gameData.fruitActive && gameData.fruitAppearanceCount == 1 && percentPoints >= 85.f)
+        {
+            gameData.board.setFruit(gameData.board.getPlayerStartingPoint(), true);
+            gameData.fruitActive = true;
+            gameData.fruitSpawnTime = now;
+            gameData.fruitAppearanceCount = 2;
+        }
+
+        if (gameData.fruitActive)
+        {
+            auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - gameData.fruitSpawnTime).count();
+            if (elapsed >= 7)
+            {
+                gameData.board.setFruit(gameData.board.getPlayerStartingPoint(), false);
+                gameData.fruitActive = false;
+
+                if (gameData.fruitAppearanceCount == 2)
+                    gameData.fruitAppearanceCount = 3;
+            }
+        }
+
+        if (gameData.fruitActive && gameData.board.hasFruit(gameData.player.getPosition()))
+        {
+            gameData.points += 100;
+            gameData.board.setFruit(gameData.board.getPlayerStartingPoint(), false);
+            gameData.fruitActive = false;
+
+            if (gameData.fruitAppearanceCount == 1)
+                gameData.fruitAppearanceCount = 2;
+            else if (gameData.fruitAppearanceCount == 2)
+                gameData.fruitAppearanceCount = 3;
         }
     }
 
@@ -155,7 +240,7 @@ namespace gameLogic
         return false;
     }
 
-    static bool checkCollition(Entity const &e1, Entity const &e2)
+    static bool checkCollition(Entity const& e1, Entity const& e2)
     {
         if ((e1.getPosition() == e2.getPosition()))
         {

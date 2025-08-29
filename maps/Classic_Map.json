@@ -2,6 +2,7 @@
 	"name": "Classic Map",
 	"width": 28,
 	"height": 22,
+	"mapcolor" : "NB",
 	"layout": [
 		"###### #####################",
 		"#............##............#",
@@ -38,7 +39,8 @@
 	},
 	"ghosts": [
 		{"id":1,"color":"NR","pos":[13,8],"scatter":"1","mode":"B"},
-		{"id":2,"color":"NM","pos":[13,20],"scatter":"2","mode":"P"},
-		{"id":3,"color":"NG","pos":[1,20],"scatter":"3","mode":"C"}
+		{"id":2,"color":"NM","pos":[12,10],"scatter":"2","mode":"P"},
+		{"id":3,"color":"NG","pos":[13,10],"scatter":"3","mode":"C"},
+		{"id":4,"color":"NC","pos":[14,10],"scatter":"4","mode":"O"}
 	]
 }

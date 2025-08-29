@@ -36,6 +36,12 @@ struct ChaseInki : MovementStrategy
     void move(Ghost& ghost, Board const& board, Player* target) override;
 };
 
+//Credits for the idea to Franco
+struct ChasePortal : MovementStrategy
+{
+    void move(Ghost& ghost, Board const& board, Player* target) override;
+};
+
 
 struct ScatterToScatterPoint : MovementStrategy
 {
@@ -67,6 +73,8 @@ inline std::unique_ptr<MovementStrategy> strategyFromString(std::string const& s
         return std::make_unique<ChaseClide>();
     case 'I':
         return std::make_unique<ChaseInki>();
+    case 'O':
+        return std::make_unique<ChasePortal>();
     default:
         return nullptr;
     }

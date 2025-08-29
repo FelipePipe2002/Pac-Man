@@ -13,8 +13,8 @@ namespace Renderer
         Board const& board,
         unsigned int points,
         unsigned int pointsDif);
-    void showStartScreen();
-    bool askPlayAgainScreen();
+    int showStartScreen(std::vector<std::string> const& maps);
+    bool askPlayAgainScreen(bool win);
 
     static int displayWidth(std::string const& text);
     static std::string colorizeAndCenter(std::string const& text, int consoleWidth, int frameIndex = 0);

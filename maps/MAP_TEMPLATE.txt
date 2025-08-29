@@ -2,6 +2,7 @@
 	"name": "Classic Map",
 	"width": 28,
 	"height": 22,
+    "mapcolor" : "NG"  can be [N|D|L][R|G|Y|B|M|C|W]
 	"layout": [
 		"############################",
 		"#............##............#",
@@ -44,9 +45,11 @@
 	"ghosts": [
 		{"id":1,"color":"NR","pos":[13,8],"scatter":"1","mode":"R"}
         /* Add more as needed, e.g.,
-            {"id":id, "color": "[N|D|L][R|G|Y|B|M|C|W]" ","pos":[x,y],"scatter":"scatterId","mode":"B|P|C|I"}
+            {"id":id, "color": "[N|D|L][R|G|Y|B|M|C|W]" ","pos":[x,y],"scatter":"scatterId","mode":"B|P|C|I|O"}
 
 			color: can be Normal, Darl or Light variations of Red, Green, Yellow, Blue,Magenta, Cyan and White
+            mode: B chase player directly, P try to be 2 places ahead of where the player is looking, C when the ghost is at a distance greater than 8 it chases it when is less than that it scatters,
+                    I not implemented very complicated, O if the player is close to a portal it tries to reach the other side of the portal
         */
 	],char const* colorString(Color forColor)
 {

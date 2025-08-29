@@ -21,18 +21,19 @@ namespace Renderer
         unsigned int pointsDif)
     {
         std::ostringstream frame;
-        frame << "ESC: quit | WASD: move\n\n";
+        frame << "ESC: quit | WASD: move\n";
 
+        frame << "\033[2K\r"; // borra la línea actual y mueve el cursor al inicio
         if (pointsDif > 0)
         {
             std::string msg = " + " + std::to_string(pointsDif);
-            frame << "Points: " << points << applyColor(Color::LightYellow, msg) << "    " << points << "," << pointsDif
-                  << std::endl;
+            frame << "Points: " << points << applyColor(Color::LightYellow, msg);
         }
         else
         {
-            frame << "Points: " << points << "\n";
+            frame << "Points: " << points;
         }
+        frame << "\n";
 
 
         int width = board.getWidth().raw();
@@ -46,7 +47,11 @@ namespace Renderer
                 std::string symbol;
                 if (!board.isEnabled(actualPos))
                 {
-                    symbol = applyColor(Color::Blue, "██");
+                    symbol = applyColor(board.getMapColor(), "██");
+                }
+                else if (board.hasFruit(actualPos))
+                {
+                    symbol = applyColor(Color::Red, "🍒");
                 }
                 else if (board.hasPoint(actualPos) && !board.hasAPellet(actualPos))
                 {
@@ -55,10 +60,6 @@ namespace Renderer
                 else if (board.hasAPellet(actualPos))
                 {
                     symbol = applyColor(Color::White, "⚈ ");
-                }
-                else if (board.hasPoint(actualPos))
-                {
-                    symbol = applyColor(Color::Red, "🍒");
                 }
                 else
                 {
@@ -94,7 +95,7 @@ namespace Renderer
         std::cout << frame.str();
     }
 
-    void showStartScreen()
+    int showStartScreen(std::vector<std::string> const& maps)
     {
         std::string animation[] = {
             "👻☕☕☕☕☕☕",
@@ -132,6 +133,8 @@ namespace Renderer
         int totalFrames = sizeof(animation) / sizeof(animation[0]);
         int i = 0;
         int const consoleWidth = 80;
+        size_t selectedMap = 0;
+
         std::string banner =
             R"(  
           ███████╗  █████╗  ██████╗     ███╗   ███╗ █████╗ ███╗   ██╗
@@ -141,6 +144,7 @@ namespace Renderer
           ██║      ██║  ██║╚██████╗     ██║ ╚═╝ ██║██║  ██║██║ ╚████║
           ╚═╝      ╚═╝  ╚═╝ ╚═════╝     ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝
         )";
+
         while (true)
         {
             Console::moveCursorHome();
@@ -159,50 +163,152 @@ namespace Renderer
 
             i = (i + 1) % totalFrames;
 
+            std::cout << "\n" << applyColor(Color::Cyan, centerText("Select a map:", consoleWidth)) << "\n\n";
+            for (size_t idx = 0; idx < maps.size(); ++idx)
+            {
+                std::string prefix = (idx == selectedMap) ? "> " : "  ";
+                Color col = (idx == selectedMap) ? Color::Green : Color::White;
+                std::cout << applyColor(col, centerText(prefix + maps[idx], consoleWidth)) << "\n";
+            }
+
+            if (auto dir = InputManager::readDirectionBuffer())
+            {
+                if (*dir == Direction::Up)
+                {
+                    selectedMap = (selectedMap == 0) ? maps.size() - 1 : selectedMap - 1;
+                }
+                else if (*dir == Direction::Down)
+                {
+                    selectedMap = (selectedMap + 1) % maps.size();
+                }
+            }
+
             std::cout << "\n"
-                      << applyColor(Color::Green, centerText("Presiona ENTER para comenzar...", consoleWidth)) << "\n";
+                      << applyColor(Color::Green, centerText("Press ENTER to start...", consoleWidth)) << "\n";
 
             if (InputManager::enterPressed()) // ENTER
             {
                 system("cls");
-                return;
+                return selectedMap;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
-    bool askPlayAgainScreen()
+    bool askPlayAgainScreen(bool win)
     {
         system("cls");
         int const consoleWidth = 80;
-        std::string const prompt = "¿Querés jugar de nuevo?";
-        std::string const instruction = "Presiona ENTER para sí, cualquier ESC para salir";
-        std::vector<std::string> const spinner = {"↻   ", " ↻  ", "  ↻ ", "   ↻"};
+
+        std::string const winMessage = "You won! 🎉 ";
+        std::string const loseMessage = "You lost! 💀 ";
+        std::string const prompt = "Do you want to play again? ";
+        std::string const instruction = "Press ENTER for yes, any ESC to exit";
+        std::vector<std::vector<std::string>> const animation = {
+            {"           ██████████           ", 
+             "      ████████████████████      ", 
+             "    ████████████████████████    ",
+             "  ███████   ██████████████████  ", 
+             " ██████████████████████████████ ",
+             " ██████████████████████████████ ", 
+             "████████████████████████████████",
+             "████████████████████████████████", 
+             "████████████████████████████████",
+             " ██████████████████████████████ ", 
+             " ██████████████████████████████ ",
+             "  ████████████████████████████  ", 
+             "    ████████████████████████    ",
+             "      ████████████████████      ", 
+             "           ██████████           "},
+            {"           ██████████           ",
+             "      ████████████████████      ",
+             "    ████████████████████████    ",
+             "  ███████   ██████████████████  ",
+             " ██████████████████████████████ ",
+             " █████████████████████████████  ",
+             "███████████████████████         ",
+             "██████████████                  ",
+             "███████████████████████         ",
+             " █████████████████████████████  ",
+             " ██████████████████████████████ ",
+             "  ████████████████████████████  ",
+             "    ████████████████████████    ",
+             "      ████████████████████      ",
+             "           ██████████           "},
+            {"           ██████████           ",
+             "      ████████████████████      ",
+             "    ████████████████████████    ",
+             "  ███████   █████████████████   ",
+             " █████████████████████████      ",
+             " ██████████████████████         ",
+             "█████████████████               ",
+             "██████████████                  ",
+             "█████████████████               ",
+             " ██████████████████████         ",
+             " █████████████████████████      ",
+             "  ███████████████████████████   ",
+             "    ████████████████████████    ",
+             "      ████████████████████      ",
+             "           ██████████           "},
+            {"           ██████████           ",
+             "      ████████████████████      ",
+             "    ████████████████████████    ",
+             "  ███████   ████████████        ",
+             " ████████████████████           ",
+             " ██████████████████             ",
+             "████████████████                ",
+             "██████████████                  ",
+             "████████████████                ",
+             " █████████████████              ",
+             " ████████████████████           ",
+             "  ██████████████████████        ",
+             "    ███████████████████████     ",
+             "      ████████████████████      ",
+             "           ██████████           "}};
 
         size_t frame = 0;
-
+        int direction = 1;
         while (true)
         {
             Console::moveCursorHome();
             std::cout << "\n\n";
+            if (win)
+            {
+                std::cout << applyColor(Color::Green, centerText(winMessage, consoleWidth)) << "\n\n";
+            }
+            else
+            {
+                std::cout << applyColor(Color::Red, centerText(loseMessage, consoleWidth)) << "\n\n";
+            }
             std::cout << applyColor(Color::Cyan, centerText(prompt, consoleWidth)) << "\n\n";
             std::cout << applyColor(Color::Yellow, centerText(instruction, consoleWidth)) << "\n\n";
-            std::cout << colorizeAndCenter(spinner[frame % spinner.size()], consoleWidth) << "\n";
 
-            frame++;
+            for (std::string const& line : animation[frame])
+            {
+                std::cout << applyColor(Color::Yellow, std::string(24, ' ') + line) << "\n";
+            }
+            frame += direction;
+
+            if (frame == animation.size() - 1 || frame == 0)
+            {
+                direction *= -1;
+            }
 
             if (InputManager::enterPressed())
             {
+                system("cls");
                 return true;
             }
 
             if (InputManager::exitPressed())
             {
+                system("cls");
                 return false;
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+        system("cls");
     }
 
 

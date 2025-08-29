@@ -141,6 +141,7 @@ namespace quicktype
         std::string name;
         int64_t width;
         int64_t height;
+        std::string mapcolor;
         std::vector<std::string> layout;
         std::map<std::string, std::vector<int64_t>> scatter_points;
         portals portals;
@@ -184,6 +185,19 @@ namespace quicktype
         void set_height(int64_t const& value)
         {
             this->height = value;
+        }
+
+        std::string const& get_mapcolor() const
+        {
+            return mapcolor;
+        }
+        std::string& get_mutable_mapcolor()
+        {
+            return mapcolor;
+        }
+        void set_mapcolor(std::string const& value)
+        {
+            this->mapcolor = value;
         }
 
         std::vector<std::string> const& get_layout() const
@@ -294,6 +308,7 @@ namespace quicktype
         x.set_name(j.at("name").get<std::string>());
         x.set_width(j.at("width").get<int64_t>());
         x.set_height(j.at("height").get<int64_t>());
+        x.set_mapcolor(j.at("mapcolor").get<std::string>());
         x.set_layout(j.at("layout").get<std::vector<std::string>>());
         x.set_scatter_points(j.at("scatterPoints").get<std::map<std::string, std::vector<int64_t>>>());
         x.set_portals(j.at("portals").get<portals>());
@@ -306,6 +321,7 @@ namespace quicktype
         j["name"] = x.get_name();
         j["width"] = x.get_width();
         j["height"] = x.get_height();
+        j["mapcolor"] = x.get_mapcolor();
         j["layout"] = x.get_layout();
         j["scatterPoints"] = x.get_scatter_points();
         j["portals"] = x.get_portals();

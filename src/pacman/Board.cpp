@@ -10,6 +10,9 @@ Board::Board(quicktype::mapJson mapJson)
 {
     mWidth = Width{static_cast<int>(mapJson.get_width())};
     mHeight = Height{static_cast<int>(mapJson.get_height())};
+    mTotalPoints = 0;
+    mLeftPoints = 0;
+    mMapColor = stringToColor(mapJson.get_mapcolor());
 
     int const newSize = mWidth.raw() * mHeight.raw();
     mMatrix.clear();
@@ -63,6 +66,7 @@ Board::Board(quicktype::mapJson mapJson)
             {
                 setEnabled(coord, true);
                 setPoint(coord, true);
+                mTotalPoints++;
             }
             else
             {
@@ -72,7 +76,7 @@ Board::Board(quicktype::mapJson mapJson)
             }
         }
     }
-
+    mLeftPoints = mTotalPoints;
     //Portals
     for (auto const& [id, coords] : mapJson.get_portals().get_data())
     {
@@ -189,6 +193,21 @@ Coordinate Board::getGhostHome() const
     return mGhostHomeCoordinate;
 }
 
+unsigned int Board::getTotalPoints() const
+{
+    return mTotalPoints;
+}
+
+unsigned int Board::getLeftPoints() const
+{
+    return mLeftPoints;
+}
+
+Color Board::getMapColor() const
+{
+    return mMapColor;
+}
+
 std::optional<Coordinate> Board::teleportFrom(Coordinate coord) const
 {
     for (std::pair<Coordinate, Coordinate> p : mPortals)
@@ -229,6 +248,15 @@ void Board::setPoint(Coordinate const& coord, bool enabled)
         return;
     }
     mMatrix[coordToPos(coord)].mPoint = enabled;
+
+    if (enabled)
+    {
+        mLeftPoints++;
+    }
+    else
+    {
+        mLeftPoints = std::max(0u, mLeftPoints - 1);
+    }
 }
 
 void Board::setPellet(Coordinate const& coord, bool enabled)
@@ -248,6 +276,12 @@ void Board::setFruit(Coordinate const& coord, bool enabled)
     }
     mMatrix[coordToPos(coord)].mFruit = enabled;
 }
+
+std::vector<std::pair<Coordinate, Coordinate>> const& Board::getPortals() const
+{
+    return mPortals;
+}
+
 
 // ---------- PRIVATE ----------
 

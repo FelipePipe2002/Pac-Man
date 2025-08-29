@@ -2,6 +2,7 @@
 
 #include "pacman/utils/Coordinate.h"
 #include "pacman/utils/StrongType.h"
+#include "pacman/utils/Color.h"
 #include "pacman/json/MapJson.h"
 #include <functional>
 #include <optional>
@@ -37,12 +38,17 @@ public:
 
     [[nodiscard]] bool allPointsCollected() const;
 
+    [[nodiscard]] unsigned int getTotalPoints() const;
+    [[nodiscard]] unsigned int getLeftPoints() const;
 
     [[nodiscard]] Coordinate getPlayerStartingPoint() const;
     [[nodiscard]] Coordinate getGhostHome() const;
 
+    [[nodiscard]] Color getMapColor() const;
+
     [[nodiscard]] std::optional<Coordinate> teleportFrom(Coordinate coord) const;
     [[nodiscard]] std::optional<Coordinate> getScatterPoint(std::string scatterPointId) const;
+    [[nodiscard]] std::vector<std::pair<Coordinate, Coordinate>> const& getPortals() const;
 
     void setEnabled(Coordinate const& coord, bool enabled);
     void setPoint(Coordinate const& coord, bool enabled);
@@ -60,7 +66,11 @@ private:
 
     Width mWidth{1};
     Height mHeight{1};
+    Color mMapColor = Color::Blue;
     std::vector<Tile> mMatrix;
+
+    unsigned int mTotalPoints{0};
+    unsigned int mLeftPoints{0};
 
     //Game elements
     std::vector<std::pair<Coordinate, Coordinate>> mPortals;

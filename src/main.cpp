@@ -47,7 +47,7 @@ void tryChangeDirection(Player& player, Direction dirBuffer, Board const& board)
 }
 
 using namespace std::chrono_literals;
-constexpr auto FRAME_DURATION = 150ms;
+constexpr auto FRAME_DURATION = 25ms;
 //===========================
 //          Main
 //===========================
@@ -57,22 +57,41 @@ int main()
     //Init Console
     Console::initConsole();
 
+    std::vector<std::string> displayNames;
+    std::vector<std::string> fileNames;
+
+    for (auto& entry : std::filesystem::directory_iterator("../maps/"))
+    {
+        if (entry.path().extension() == ".json")
+        {
+            std::string fname = entry.path().filename().string();
+            fileNames.push_back(fname);
+
+            std::string display = entry.path().stem().string();
+            std::replace(display.begin(), display.end(), '_', ' ');
+            displayNames.push_back(display);
+        }
+    }
+
+    bool win = false;
+
     do
     {
-
-        while (InputManager::enterPressed())
+        while (InputManager::enterPressed()) //tiny buffer so it doesn't auto skip the start screen
         {
             std::this_thread::sleep_for(10ms);
         }
 
-        Renderer::showStartScreen();
-        gameLogic::GameData gameData = gameLogic::initGame("../assets/map1.json");
+        int selectedIndex = Renderer::showStartScreen(displayNames);
+
+        std::string selectedFile = fileNames[selectedIndex];
+
+        gameLogic::GameData gameData = gameLogic::initGame("../maps/" + selectedFile);
         gameLogic::startGame(gameData);
 
         Direction dirBuffer = Direction::None;
-
         bool playing = true;
-        unsigned int pointBefore = gameData.points;
+
         while (playing)
         {
             // --- INPUT ---
@@ -84,18 +103,28 @@ int main()
 
             tryChangeDirection(gameData.player, dirBuffer, gameData.board);
 
+
+            // --- UPDATE ENTITY MOVEMENT ---
+            gameLogic::updateFrameCounters(gameData);
+
+
             // --- SAVE POINTS BEFORE THIS FRAME ---
             unsigned int pointsBefore = gameData.points;
 
+
             // --- UPDATE GAME STATE ---
             gameLogic::handlePlayerMovement(gameData, gameData.player);
-            gameLogic::handleGhostsMovement(gameData.board, gameData.ghosts);
+            gameLogic::handleGhostsMovement(gameData, gameData.ghosts);
             gameLogic::handleGhostEaten(gameData);
             gameLogic::handleGhostBehavior(gameData);
-            gameLogic::checkPelletFinish(gameData);
+            gameLogic::endFrightenedMode(gameData);
 
+            // --- HANDLE FRUIT ---
+            gameLogic::handleFruit(gameData);
+
+            // --- CALCULATE POINTS DIFFERENCE ---
             unsigned int pointsDif = gameData.points - pointsBefore;
-            //TODO: fix this shit
+
             // --- RENDER ---
             Console::moveCursorHome();
             Renderer::drawGrid(gameData.player, gameData.ghosts, gameData.board, gameData.points, pointsDif);
@@ -103,12 +132,12 @@ int main()
             // --- CHECK WIN/LOSE ---
             if (gameLogic::checkWinCondition(gameData.board))
             {
-                std::cout << applyColor(Color::Green, "¡Ganaste!\n");
+                win = true;
                 playing = false;
             }
             else if (gameLogic::checkLoseCondition(gameData.ghosts, gameData.player))
             {
-                std::cout << applyColor(Color::Red, "Perdiste!\n");
+                win = false;
                 playing = false;
             }
 
@@ -116,5 +145,5 @@ int main()
             std::this_thread::sleep_for(FRAME_DURATION);
         }
 
-    } while (Renderer::askPlayAgainScreen());
+    } while (Renderer::askPlayAgainScreen(win));
 }
