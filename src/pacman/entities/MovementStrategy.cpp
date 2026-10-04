@@ -131,21 +131,25 @@ void ChasePinky::move(Ghost& ghost, Board const& board, Player* target)
     switch (target->getDirection())
     {
     case Direction::Up:
-    {
         targetPos.y -= 2;
-    }
+        break;
     case Direction::Down:
-    {
         targetPos.y += 2;
-    }
+        break;
     case Direction::Left:
-    {
         targetPos.x -= 2;
-    }
+        break;
     case Direction::Right:
-    {
         targetPos.x += 2;
+        break;
+    default:
+        break;
     }
+
+    // If the tile ahead is a wall or out of bounds, chase the player directly
+    if (!board.isEnabled(targetPos))
+    {
+        targetPos = target->getPosition();
     }
 
     Direction dir = findWay(board, ghost.getPosition(), targetPos, ghost.getLastPosition());

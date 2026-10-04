@@ -162,7 +162,7 @@ Every ghost uses a **BFS pathfinder** (`MovementStrategy::findWay`) that knows a
 | Mode | Name | Behavior in Chase mode |
 |---|---|---|
 | `B` | **Blinky** | Goes straight for Pac-Man's current tile. |
-| `P` | **Pinky** | Aims at a tile ahead of Pac-Man, trying to cut him off. |
+| `P` | **Pinky** | Aims 2 tiles ahead of where Pac-Man is facing, trying to cut him off. If that tile is a wall, chases Pac-Man directly. |
 | `C` | **Clyde** | Chases Pac-Man while more than 8 tiles away. Once closer, retreats to his scatter corner. |
 | `O` | **Portal** | Original ghost: when Pac-Man is near a portal, it heads to the *other side* of that portal to ambush him. Otherwise it patrols its scatter point. |
 | `I` | **Inky** | *Reserved / not implemented yet.* |
